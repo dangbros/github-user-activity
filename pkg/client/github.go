@@ -34,9 +34,18 @@ func FetchEvents(username string) ([]GithubEvent, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 404 {
+	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("user %s not found", username)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("github api error: status %d", resp.StatusCode)
+	}
 
-	json.NewDecoder(resp.Body).Decode()
+	var events []GithubEvent
+	err = json.NewDecoder(resp.Body).Decode(&events)
+	if err != nil {
+		return nil, fmt.Errorf("could not decode response: %v", err)
+	}
+
+	return events, nil
 }
