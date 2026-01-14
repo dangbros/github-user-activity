@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/dangbros/github-user-activity/pkg/client"
 )
 
 func main() {
@@ -13,5 +15,11 @@ func main() {
 	}
 	username := os.Args[1]
 	fmt.Printf("Fetching activity for: %s...\n", username)
+	events, err := client.FetchEvents(username)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)
+	}
+	fmt.Println(len(events))
 
 }
