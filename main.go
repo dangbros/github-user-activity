@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/dangbros/github-user-activity/pkg/client"
+	"github.com/dangbros/github-user-activity/pkg/ui"
 )
 
 func main() {
@@ -20,6 +21,9 @@ func main() {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)
 	}
-	fmt.Println(len(events))
+	for _, event := range events {
+		fmt.Println(ui.FormatEvent(event))
+	}
 
+	fmt.Println("end thank you")
 }
