@@ -21,9 +21,10 @@ func main() {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)
 	}
+	var lines []string
 	for _, event := range events {
-		fmt.Println(ui.FormatEvent(event))
+		lines = append(lines, ui.FormatEvent(event))
 	}
-
-	fmt.Println("end thank you")
+	output := ui.RenderBox(lines)
+	fmt.Print(output)
 }
