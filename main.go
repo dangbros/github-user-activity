@@ -10,8 +10,10 @@ import (
 )
 
 func main() {
+	limit := flag.Int("limit", 0, "limit number of events (0 = all)")
 	eventType := flag.String("type", "", "filter by event type (e.g. PushEvent)")
 	flag.Parse()
+
 	args := flag.Args()
 	if len(args) < 1 {
 		fmt.Println("Error!")
@@ -38,8 +40,14 @@ func main() {
 		filteredEvents = temp
 	}
 
+	finalEvents := filteredEvents
+
+	if *limit > 0 && *limit < len(filteredEvents) {
+		finalEvents = filteredEvents[:*limit]
+	}
+
 	var lines []string
-	for _, event := range filteredEvents {
+	for _, event := range finalEvents {
 		lines = append(lines, ui.FormatEvent(event))
 	}
 	output := ui.RenderBox(lines)
