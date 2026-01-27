@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -9,20 +10,36 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Error: Username is required.")
-		fmt.Println("Usage: github-user-activity <username>")
+	eventType := flag.String("type", "", "filter by event type (e.g. PushEvent)")
+	flag.Parse()
+	args := flag.Args()
+	if len(args) < 1 {
+		fmt.Println("Error!")
 		os.Exit(1)
 	}
-	username := os.Args[1]
+
+	username := args[0]
+
 	fmt.Printf("Fetching activity for: %s...\n", username)
 	events, err := client.FetchEvents(username)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)
 	}
+
+	filteredEvents := events
+	if *eventType != "" {
+		var temp []client.GithubEvent
+		for _, event := range events {
+			if event.Type == *eventType {
+				temp = append(temp, event)
+			}
+		}
+		filteredEvents = temp
+	}
+
 	var lines []string
-	for _, event := range events {
+	for _, event := range filteredEvents {
 		lines = append(lines, ui.FormatEvent(event))
 	}
 	output := ui.RenderBox(lines)
