@@ -46,10 +46,9 @@ func main() {
 		finalEvents = filteredEvents[:*limit]
 	}
 
-	var lines []string
+	var lines []ui.EventRow
 	for _, event := range finalEvents {
-		lines = append(lines, ui.FormatEvent(event))
+		lines = append(lines, ui.ToRow(event))
 	}
-	output := ui.RenderBox(lines)
-	fmt.Print(output)
+	fmt.Println(ui.RenderTable(lines))
 }
