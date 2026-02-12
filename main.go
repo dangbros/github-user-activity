@@ -50,5 +50,10 @@ func main() {
 	for _, event := range finalEvents {
 		lines = append(lines, ui.ToRow(event))
 	}
-	fmt.Println(ui.RenderTable(lines))
+	title := ui.RenderTitle(username)
+	table := ui.RenderTable(lines)
+
+	fmt.Println(title)
+	fmt.Println()
+	fmt.Println(table)
 }

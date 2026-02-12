@@ -1,16 +1,63 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"strings"
 
-var (
-	typeCol = lipgloss.NewStyle().Width(8).PaddingRight(1).Bold(true)
-	repoCol = lipgloss.NewStyle().Width(30).PaddingRight(1)
-	timeCol = lipgloss.NewStyle().Width(10).Align(lipgloss.Right)
+	"github.com/charmbracelet/lipgloss"
 )
 
 func RenderTable(rows []EventRow) string {
-	// headerStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12"))
-	// cellStyle := lipgloss.NewStyle().PaddingRight(2)
+	//dynamic max width
+	maxType := len("TYPE")
+	maxRepo := len("REPO")
+	maxTime := len("WHEN")
+
+	for _, r := range rows {
+		if len(r.Type) > maxType {
+			maxType = len(r.Type)
+		}
+		if len(r.Repo) > maxRepo {
+			maxRepo = len(r.Repo)
+		}
+		if len(r.Time) > maxTime {
+			maxTime = len(r.Time)
+		}
+	}
+
+	//column styles using computed widths
+	typeCol := lipgloss.NewStyle().
+		Width(maxType + 2).
+		PaddingRight(1).
+		Bold(true)
+
+	repoCol := lipgloss.NewStyle().
+		Width(maxRepo + 2).
+		PaddingRight(1)
+
+	timeCol := lipgloss.NewStyle().
+		Width(maxTime + 2).
+		Align(lipgloss.Right)
+
+	//seperator row
+	seperator := lipgloss.JoinHorizontal(
+		lipgloss.Left,
+		typeCol.
+			UnsetBold().
+			Foreground(lipgloss.Color("8")).
+			Render(strings.Repeat("─", maxType)),
+
+		repoCol.
+			UnsetBold().
+			Foreground(lipgloss.Color("8")).
+			Render(strings.Repeat("─", maxType)),
+
+		timeCol.
+			UnsetBold().
+			Foreground(lipgloss.Color("8")).
+			Render(strings.Repeat("─", maxType)),
+	)
+
+	//header rendering
 	headers := lipgloss.JoinHorizontal(
 		lipgloss.Left,
 		typeCol.Render("TYPE"),
@@ -18,6 +65,7 @@ func RenderTable(rows []EventRow) string {
 		timeCol.Render("WHEN"),
 	)
 
+	//render body
 	var body []string
 
 	for _, r := range rows {
@@ -33,6 +81,7 @@ func RenderTable(rows []EventRow) string {
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		headers,
+		seperator,
 		lipgloss.JoinVertical(lipgloss.Left, body...),
 	)
 
