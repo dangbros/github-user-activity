@@ -6,6 +6,18 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+func truncate(text string, max int) string {
+	if len(text) <= max {
+		return text
+	}
+
+	if max <= 1 {
+		return text[:max]
+	}
+
+	return text[:max-1] + "..."
+}
+
 func buildColumnStyles(w columnWidth) (typeCol, repoCol, timeCol lipgloss.Style) {
 	typeCol = lipgloss.NewStyle().
 		Width(w.Type + 2).
@@ -18,7 +30,8 @@ func buildColumnStyles(w columnWidth) (typeCol, repoCol, timeCol lipgloss.Style)
 
 	timeCol = lipgloss.NewStyle().
 		Width(w.Time + 2).
-		Align(lipgloss.Right)
+		Align(lipgloss.Right).
+		Foreground(lipgloss.Color("8"))
 
 	return typeCol, repoCol, timeCol
 }
@@ -49,16 +62,17 @@ func renderSeperator(typeCol, repoCol, timeCol lipgloss.Style, w columnWidth) st
 	)
 }
 
-func renderBody(rows []EventRow, typeCol, repoCol, timeCol lipgloss.Style) string {
+func renderBody(rows []EventRow, w columnWidth, typeCol, repoCol, timeCol lipgloss.Style) string {
 	var body []string
 
 	for _, r := range rows {
 		styledType := styleType(r.Type)
+		truncatedRepo := truncate(r.Repo, w.Repo)
 
 		line := lipgloss.JoinHorizontal(
 			lipgloss.Left,
 			typeCol.Render(styledType),
-			repoCol.Render(r.Repo),
+			repoCol.Render(truncatedRepo),
 			timeCol.Render(r.Time),
 		)
 		body = append(body, line)
@@ -84,7 +98,7 @@ func RenderTable(rows []EventRow) string {
 
 	seperator := renderSeperator(typeCol, repoCol, timeCol, widths)
 
-	body := renderBody(rows, typeCol, repoCol, timeCol)
+	body := renderBody(rows, widths, typeCol, repoCol, timeCol)
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
