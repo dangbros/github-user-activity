@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -29,13 +30,13 @@ type Commit struct {
 	Message string `json:"message"`
 }
 
-func fetchPage(username string, page int) ([]GithubEvent, error) {
+func fetchPage(ctx context.Context, username string, page int) ([]GithubEvent, error) {
 	url := fmt.Sprintf(
 		"https://api.github.com/users/%s/events?per_page=100&page=%d",
 		username,
 		page,
 	)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +84,11 @@ func fetchPage(username string, page int) ([]GithubEvent, error) {
 	return events, nil
 }
 
-func FetchEvents(username string) ([]GithubEvent, error) {
+func FetchEvents(ctx context.Context, username string) ([]GithubEvent, error) {
 	var allEvents []GithubEvent
 
 	for page := 1; page <= 10; page++ {
-		events, err := fetchPage(username, page)
+		events, err := fetchPage(ctx, username, page)
 		if err != nil {
 			if len(allEvents) > 0 {
 				return allEvents, fmt.Errorf("partial results returned: %w", err)

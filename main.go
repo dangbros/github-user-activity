@@ -1,59 +1,13 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"os"
 
-	"github.com/dangbros/github-user-activity/pkg/client"
-	"github.com/dangbros/github-user-activity/pkg/ui"
+	"github.com/dangbros/github-user-activity/internal/app"
 )
 
 func main() {
-	limit := flag.Int("limit", 0, "limit number of events (0 = all)")
-	eventType := flag.String("type", "", "filter by event type (e.g. PushEvent)")
-	flag.Parse()
-
-	args := flag.Args()
-	if len(args) < 1 {
-		fmt.Println("Error!")
+	if err := app.Run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
 		os.Exit(1)
 	}
-
-	username := args[0]
-
-	fmt.Printf("Fetching activity for: %s...\n", username)
-	events, err := client.FetchEvents(username)
-	if err != nil {
-		fmt.Printf("Error: %v", err)
-		os.Exit(1)
-	}
-
-	filteredEvents := events
-	if *eventType != "" {
-		var temp []client.GithubEvent
-		for _, event := range events {
-			if event.Type == *eventType {
-				temp = append(temp, event)
-			}
-		}
-		filteredEvents = temp
-	}
-
-	finalEvents := filteredEvents
-
-	if *limit > 0 && *limit < len(filteredEvents) {
-		finalEvents = filteredEvents[:*limit]
-	}
-
-	var lines []ui.EventRow
-	for _, event := range finalEvents {
-		lines = append(lines, ui.ToRow(event))
-	}
-	title := ui.RenderTitle(username)
-	table := ui.RenderTable(lines)
-
-	fmt.Println(title)
-	fmt.Println()
-	fmt.Println(table)
 }
